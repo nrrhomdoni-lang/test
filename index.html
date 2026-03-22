@@ -1,0 +1,1788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RBX 3D Forge — Image to 3D for Roblox (Tripo3D)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --red: #e8413a;
+    --red-dark: #b52f2a;
+    --blue: #0a84e8;
+    --blue-dark: #0660b0;
+    --green: #22c55e;
+    --green-dark: #15803d;
+    --yellow: #fbbf24;
+    --bg: #1a1a2e;
+    --panel: #16213e;
+    --card: #0f3460;
+    --card2: #1e3a5f;
+    --text: #e8f4fd;
+    --muted: #7da5c7;
+    --border: #2a4a6e;
+    --glow-red: 0 0 20px rgba(232,65,58,0.4);
+    --glow-blue: 0 0 20px rgba(10,132,232,0.4);
+    --glow-green: 0 0 20px rgba(34,197,94,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(10,132,232,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(232,65,58,0.08) 0%, transparent 60%);
+  }
+
+  /* STUDS BACKGROUND */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+
+  .logo-block {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+
+  .logo-icon {
+    width: 56px;
+    height: 56px;
+    background: var(--red);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: var(--glow-red), 0 4px 0 var(--red-dark);
+    animation: float 3s ease-in-out infinite;
+    font-family: 'Fredoka One', cursive;
+    color: white;
+    letter-spacing: -1px;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+  }
+
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.4rem;
+    color: var(--text);
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+
+  h1 span { color: var(--red); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 6px;
+  }
+
+  /* LEGO BRICK DIVIDER */
+  .brick-divider {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 16px 0 28px;
+  }
+
+  .brick {
+    width: 32px;
+    height: 16px;
+    border-radius: 3px;
+    position: relative;
+  }
+
+  .brick::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 7px;
+    border-radius: 50% 50% 0 0;
+  }
+
+  .brick-r { background: var(--red); }
+  .brick-r::before { background: var(--red-dark); }
+  .brick-b { background: var(--blue); }
+  .brick-b::before { background: var(--blue-dark); }
+  .brick-g { background: var(--green); }
+  .brick-g::before { background: var(--green-dark); }
+  .brick-y { background: var(--yellow); }
+  .brick-y::before { background: #d97706; }
+
+  /* CARDS */
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    border: 2px solid var(--border);
+    padding: 24px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red), var(--blue), var(--green));
+  }
+
+  .card-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .step-badge {
+    background: var(--red);
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-family: 'Fredoka One', cursive;
+    box-shadow: 0 3px 0 var(--red-dark);
+    flex-shrink: 0;
+  }
+
+  /* API KEY INPUT */
+  .input-group {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .input-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"]:focus, input[type="password"]:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(10,132,232,0.15);
+  }
+
+  input::placeholder { color: var(--muted); font-weight: 400; }
+
+  .toggle-eye {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 4px;
+  }
+
+  .api-hint {
+    margin-top: 10px;
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .api-hint a {
+    color: var(--blue);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .api-hint a:hover { text-decoration: underline; }
+
+  /* BUTTONS */
+  .btn {
+    font-family: 'Fredoka One', cursive;
+    letter-spacing: 0.5px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 12px 22px;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .btn:active { transform: translateY(2px); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  .btn-red {
+    background: var(--red);
+    color: white;
+    box-shadow: 0 4px 0 var(--red-dark);
+  }
+  .btn-red:hover:not(:disabled) { background: #f05550; box-shadow: 0 4px 0 var(--red-dark); }
+
+  .btn-blue {
+    background: var(--blue);
+    color: white;
+    box-shadow: 0 4px 0 var(--blue-dark);
+  }
+  .btn-blue:hover:not(:disabled) { background: #2a9af5; }
+
+  .btn-green {
+    background: var(--green);
+    color: white;
+    box-shadow: 0 4px 0 var(--green-dark);
+  }
+  .btn-green:hover:not(:disabled) { background: #34d975; }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--muted);
+    border: 2px solid var(--border);
+    box-shadow: none;
+  }
+  .btn-outline:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+
+  .btn-sm { padding: 8px 14px; font-size: 0.85rem; }
+
+  /* UPLOAD ZONE */
+  .upload-zone {
+    border: 3px dashed var(--border);
+    border-radius: 14px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--panel);
+    position: relative;
+  }
+
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--blue);
+    background: rgba(10,132,232,0.06);
+    box-shadow: var(--glow-blue);
+  }
+
+  .upload-zone input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .upload-icon { font-size: 3rem; margin-bottom: 12px; display: block; }
+
+  .upload-text {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .upload-sub { font-size: 0.82rem; color: var(--muted); }
+
+  /* PREVIEW */
+  .preview-area {
+    display: none;
+    gap: 16px;
+    align-items: flex-start;
+    margin-top: 16px;
+  }
+
+  .preview-area.visible { display: flex; }
+
+  .preview-img-wrap {
+    width: 120px;
+    height: 120px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 3px solid var(--border);
+    flex-shrink: 0;
+    background: var(--panel);
+  }
+
+  .preview-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .preview-info { flex: 1; }
+
+  .preview-name {
+    font-weight: 800;
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+    word-break: break-all;
+  }
+
+  .preview-size { font-size: 0.8rem; color: var(--muted); margin-bottom: 12px; }
+
+  /* SETTINGS GRID */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .setting-item label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  select {
+    width: 100%;
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%237da5c7' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+  }
+
+  select:focus { border-color: var(--blue); }
+
+  /* FORMAT CHECKBOXES */
+  .format-grid {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .format-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+
+  .format-check:hover { border-color: var(--blue); }
+  .format-check.active { border-color: var(--green); background: rgba(34,197,94,0.1); color: var(--green); }
+
+  .format-check input { display: none; }
+
+  /* PROGRESS */
+  .progress-card {
+    display: none;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .progress-card.visible { display: block; }
+
+  .progress-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+    color: var(--yellow);
+  }
+
+  .progress-bar-wrap {
+    background: var(--panel);
+    border-radius: 20px;
+    height: 20px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 2px solid var(--border);
+    position: relative;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    border-radius: 20px;
+    transition: width 0.5s ease;
+    width: 0%;
+    position: relative;
+  }
+
+  .progress-bar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .progress-status {
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .progress-dots::after {
+    content: '';
+    animation: dots 1.5s infinite;
+  }
+
+  @keyframes dots {
+    0% { content: '.'; }
+    33% { content: '..'; }
+    66% { content: '...'; }
+  }
+
+  /* RESULT CARD */
+  .result-card {
+    display: none;
+    background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(10,132,232,0.1));
+    border: 2px solid var(--green);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--glow-green);
+  }
+
+  .result-card.visible { display: block; }
+
+  .result-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .result-icon {
+    font-size: 2rem;
+    animation: bounce 1s ease infinite alternate;
+  }
+
+  @keyframes bounce {
+    from { transform: translateY(0); }
+    to { transform: translateY(-6px); }
+  }
+
+  .result-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: var(--green);
+  }
+
+  .result-subtitle { font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+
+  .download-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .download-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .download-btn:hover {
+    border-color: var(--green);
+    background: rgba(34,197,94,0.1);
+    transform: translateY(-2px);
+    box-shadow: var(--glow-green);
+  }
+
+  .download-btn .fmt-icon { font-size: 1.8rem; }
+  .download-btn .fmt-label { font-family: 'Fredoka One', cursive; font-size: 0.95rem; letter-spacing: 0.5px; }
+  .download-btn .fmt-desc { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+
+  /* ROBLOX GUIDE */
+  .guide-card {
+    background: linear-gradient(135deg, rgba(251,191,36,0.08), rgba(232,65,58,0.05));
+    border: 2px solid rgba(251,191,36,0.3);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .guide-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: var(--yellow);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .guide-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .guide-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .guide-num {
+    background: var(--yellow);
+    color: #1a1a2e;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .guide-text {
+    font-size: 0.87rem;
+    line-height: 1.5;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .guide-text code {
+    background: rgba(251,191,36,0.15);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: var(--yellow);
+    font-family: monospace;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transform: translateX(120%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 100;
+    max-width: 320px;
+  }
+
+  .toast.show { transform: translateX(0); }
+  .toast.success { border-color: var(--green); }
+  .toast.error { border-color: var(--red); }
+  .toast.info { border-color: var(--blue); }
+
+  /* LOG */
+  .log-area {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    max-height: 120px;
+    overflow-y: auto;
+    line-height: 1.6;
+    display: none;
+  }
+
+  .log-area.visible { display: block; }
+  .log-line.ok { color: var(--green); }
+  .log-line.err { color: var(--red); }
+  .log-line.info { color: var(--blue); }
+
+  /* HELPER */
+  .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .mt-12 { margin-top: 12px; }
+  .tag { background: rgba(10,132,232,0.15); color: var(--blue); padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; border: 1px solid rgba(10,132,232,0.3); }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    h1 { font-size: 1.8rem; }
+    .settings-grid { grid-template-columns: 1fr; }
+    .download-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-block">
+      <div class="logo-icon">3D</div>
+      <div>
+        <h1>RBX <span>3D</span> Forge</h1>
+      </div>
+    </div>
+    <div class="subtitle">Image → 3D Model → Roblox Studio · Powered by Tripo3D AI</div>
+  </header>
+
+  <div class="brick-divider">
+    <div class="brick brick-r"></div>
+    <div class="brick brick-b"></div>
+    <div class="brick brick-g"></div>
+    <div class="brick brick-y"></div>
+    <div class="brick brick-r"></div>
+    <div class="brick brick-b"></div>
+  </div>
+
+  <!-- STEP 1: API KEYS -->
+  <div class="card">
+    <div class="card-title">
+      <div class="step-badge">1</div>
+      API Keys Setup
+      <span class="tag">GRATIS SEMUA</span>
+    </div>
+
+    <!-- Tripo3D Key -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.8rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+        🎮 Tripo3D API Key <span style="color:var(--green);font-size:0.75rem;">(untuk generate 3D model)</span>
+      </div>
+      <div class="input-group">
+        <div class="input-wrap">
+          <input type="password" id="apiKey" placeholder="tsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+          <button class="toggle-eye" onclick="toggleKey('apiKey')" title="Show/Hide">👁️</button>
+        </div>
+      </div>
+      <div class="api-hint" style="margin-top:6px;">
+        Daftar gratis → <a href="https://studio.tripo3d.ai" target="_blank">studio.tripo3d.ai</a> → <a href="https://platform.tripo3d.ai" target="_blank">platform.tripo3d.ai</a> → API Keys → Create
+        &nbsp;·&nbsp; <strong>300 kredit/bulan</strong>
+      </div>
+    </div>
+
+    <!-- imgbb Key -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:0.8rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+        🖼️ imgbb API Key <span style="color:var(--yellow);font-size:0.75rem;">(untuk hosting gambar sementara)</span>
+      </div>
+      <div class="input-group">
+        <div class="input-wrap">
+          <input type="password" id="imgbbKey" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off">
+          <button class="toggle-eye" onclick="toggleKey('imgbbKey')" title="Show/Hide">👁️</button>
+        </div>
+      </div>
+      <div class="api-hint" style="margin-top:6px;">
+        Daftar gratis → <a href="https://imgbb.com" target="_blank">imgbb.com</a> → Login → <a href="https://api.imgbb.com" target="_blank">api.imgbb.com</a> → Get API key
+        &nbsp;·&nbsp; <strong>Unlimited upload</strong>
+      </div>
+    </div>
+
+    <button class="btn btn-blue" onclick="saveKeys()" style="width:100%;justify-content:center;">💾 Simpan Kedua API Key</button>
+    <div id="keyStatus" style="margin-top:10px;font-size:0.82rem;display:none;"></div>
+  </div>
+
+  <!-- STEP 2: UPLOAD -->
+  <div class="card">
+    <div class="card-title">
+      <div class="step-badge">2</div>
+      Upload Gambar Objek
+    </div>
+
+    <div class="upload-zone" id="uploadZone" ondragover="handleDrag(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+      <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)">
+      <span class="upload-icon">🖼️</span>
+      <div class="upload-text">Drag & drop gambar atau klik untuk pilih</div>
+      <div class="upload-sub">PNG, JPG, WEBP — Maks 10MB · Objek tunggal dengan background bersih = hasil terbaik</div>
+    </div>
+
+    <div class="preview-area" id="previewArea">
+      <div class="preview-img-wrap">
+        <img id="previewImg" src="" alt="preview">
+      </div>
+      <div class="preview-info">
+        <div class="preview-name" id="fileName">—</div>
+        <div class="preview-size" id="fileSize">—</div>
+        <button class="btn btn-outline btn-sm" onclick="clearFile()">✕ Ganti gambar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: SETTINGS -->
+  <div class="card">
+    <div class="card-title">
+      <div class="step-badge">3</div>
+      Pengaturan Model 3D
+    </div>
+
+    <div class="settings-grid">
+      <div class="setting-item">
+        <label>🎨 Mode Generate</label>
+        <select id="mode">
+          <option value="draft">Draft (Cepat ~20 detik)</option>
+          <option value="standard" selected>Standard (~1 menit)</option>
+          <option value="detailed">Detailed (Kualitas tinggi ~2 menit)</option>
+        </select>
+      </div>
+      <div class="setting-item">
+        <label>🏗️ Art Style</label>
+        <select id="artStyle">
+          <option value="realistic">Realistic</option>
+          <option value="cartoon">Cartoon / Stylized</option>
+          <option value="low-poly">Low Poly (Roblox-friendly)</option>
+          <option value="sculpture">Sculpture</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom: 8px;">
+      <label style="font-size:0.8rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">📦 Format Download</label>
+      <div class="format-grid" id="formatGrid">
+        <label class="format-check active" data-fmt="obj">
+          <input type="checkbox" value="obj" checked> OBJ <span style="font-size:0.75rem;color:var(--muted)">(Universal)</span>
+        </label>
+        <label class="format-check" data-fmt="fbx">
+          <input type="checkbox" value="fbx"> FBX <span style="font-size:0.75rem;color:var(--muted)">(Roblox Studio)</span>
+        </label>
+        <label class="format-check" data-fmt="glb">
+          <input type="checkbox" value="glb"> GLB <span style="font-size:0.75rem;color:var(--muted)">(Web/Unity)</span>
+        </label>
+        <label class="format-check" data-fmt="stl">
+          <input type="checkbox" value="stl"> STL <span style="font-size:0.75rem;color:var(--muted)">(3D Print)</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="mt-12 row">
+      <button class="btn btn-red" id="generateBtn" onclick="startGenerate()" style="font-size:1.05rem; padding:14px 28px;">
+        🚀 Generate 3D Model!
+      </button>
+      <span style="font-size:0.82rem; color:var(--muted); font-weight:700;">~1 kredit per model</span>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-card" id="progressCard">
+    <div class="progress-title">⚙️ Memproses Model 3D<span class="progress-dots"></span></div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-status" id="progressStatus">Mengirim gambar ke Meshy AI...</div>
+    <div class="log-area visible mt-12" id="logArea"></div>
+  </div>
+
+  <!-- RESULT -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <div class="result-icon">🎉</div>
+      <div>
+        <div class="result-title">3D Model Siap!</div>
+        <div class="result-subtitle" id="resultSubtitle">Download file dan import ke Roblox Studio</div>
+      </div>
+    </div>
+
+    <div class="download-grid" id="downloadGrid"></div>
+
+    <!-- ROBLOX IMPORT GUIDE -->
+    <div class="guide-card">
+      <div class="guide-title">🎮 Cara Import ke Roblox Studio</div>
+      <div class="guide-steps">
+        <div class="guide-step">
+          <div class="guide-num">1</div>
+          <div class="guide-text">Download file <code>FBX</code> atau <code>OBJ</code> dari atas</div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-num">2</div>
+          <div class="guide-text">Buka <strong>Roblox Studio</strong> → buat atau buka project</div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-num">3</div>
+          <div class="guide-text">Di menu atas klik <code>Home</code> → <code>Import 3D</code> (atau <code>Model</code> tab)</div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-num">4</div>
+          <div class="guide-text">Pilih file FBX/OBJ yang sudah didownload → klik <strong>Import</strong></div>
+        </div>
+        <div class="guide-step">
+          <div class="guide-num">5</div>
+          <div class="guide-text">Object akan muncul di <code>Workspace</code> sebagai <strong>MeshPart</strong> — siap dipakai! 🎮</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-outline" onclick="resetAll()" style="width:100%; justify-content:center;">🔄 Generate Model Baru</button>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ─── STATE ────────────────────────────────────────────────────
+  let selectedFile = null;
+  let currentTaskId = null;
+  let modelUrls = {};
+  const TRIPO_API = 'https://api.tripo3d.ai/v2/openapi';
+
+  // ─── FORMAT TOGGLE ────────────────────────────────────────────
+  document.querySelectorAll('.format-check').forEach(label => {
+    label.addEventListener('click', () => {
+      label.classList.toggle('active');
+      const cb = label.querySelector('input[type="checkbox"]');
+      cb.checked = !cb.checked;
+    });
+  });
+
+  // ─── API KEYS ─────────────────────────────────────────────────
+  window.addEventListener('load', () => {
+    const tripo = localStorage.getItem('tripo_api_key');
+    const imgbb = localStorage.getItem('imgbb_api_key');
+    if (tripo) document.getElementById('apiKey').value = tripo;
+    if (imgbb) document.getElementById('imgbbKey').value = imgbb;
+    if (tripo && imgbb) {
+      showKeyStatus('✅ Kedua API key sudah tersimpan — siap generate!', 'ok');
+    } else if (tripo || imgbb) {
+      showKeyStatus('⚠️ Satu API key belum diisi', 'warn');
+    }
+  });
+
+  function toggleKey(id) {
+    const inp = document.getElementById(id);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  function saveKeys() {
+    const tripo = document.getElementById('apiKey').value.trim();
+    const imgbb = document.getElementById('imgbbKey').value.trim();
+    if (!tripo && !imgbb) { showToast('⚠️ Isi minimal satu API key', 'error'); return; }
+    if (tripo) localStorage.setItem('tripo_api_key', tripo);
+    if (imgbb) localStorage.setItem('imgbb_api_key', imgbb);
+    if (tripo && imgbb) {
+      showKeyStatus('✅ Kedua API key tersimpan — siap generate!', 'ok');
+      showToast('✅ API keys tersimpan!', 'success');
+    } else {
+      showKeyStatus('⚠️ ' + (!tripo ? 'Tripo3D key belum diisi' : 'imgbb key belum diisi'), 'warn');
+      showToast('⚠️ Satu key belum diisi', 'error');
+    }
+  }
+
+  function showKeyStatus(msg, type) {
+    const el = document.getElementById('keyStatus');
+    el.style.display = 'block';
+    el.style.color = type === 'ok' ? 'var(--green)' : type === 'warn' ? 'var(--yellow)' : 'var(--red)';
+    el.textContent = msg;
+  }
+
+  // ─── FILE HANDLING ────────────────────────────────────────────
+  function handleDrag(e) {
+    e.preventDefault();
+    document.getElementById('uploadZone').classList.add('drag-over');
+  }
+
+  function handleDragLeave(e) {
+    document.getElementById('uploadZone').classList.remove('drag-over');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('uploadZone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) processFile(file);
+    else showToast('⚠️ File harus berupa gambar', 'error');
+  }
+
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (file) processFile(file);
+  }
+
+  function processFile(file) {
+    if (file.size > 20 * 1024 * 1024) {
+      showToast('⚠️ Ukuran gambar maks 20MB', 'error');
+      return;
+    }
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('previewImg').src = ev.target.result;
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(1) + ' KB · ' + file.type;
+      document.getElementById('previewArea').classList.add('visible');
+      document.getElementById('uploadZone').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearFile() {
+    selectedFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('previewArea').classList.remove('visible');
+    document.getElementById('uploadZone').style.display = '';
+  }
+
+  // ─── STEP 1: UPLOAD LANGSUNG KE TRIPO (base64 multipart) ─────
+  async function uploadToImgbb(imgbbKey, file) {
+    // Coba imgbb dulu, fallback ke base64 URL langsung
+    addLog('🖼️ Upload gambar...', 'info');
+
+    // METHOD 1: Coba imgbb
+    if (imgbbKey && imgbbKey.length > 10) {
+      try {
+        const base64 = await fileToBase64Pure(file);
+        const formData = new FormData();
+        formData.append('image', base64);
+
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && data.data?.url) {
+            addLog(`✓ imgbb OK: ${data.data.url.slice(0,40)}...`, 'ok');
+            return { type: 'url', value: data.data.url };
+          }
+        }
+        addLog('⚠️ imgbb gagal, coba metode alternatif...', 'err');
+      } catch(e) {
+        addLog(`⚠️ imgbb error: ${e.message} — pakai metode lain`, 'err');
+      }
+    }
+
+    // METHOD 2: Upload langsung ke Tripo sebagai file multipart
+    addLog('📤 Upload langsung ke Tripo3D...', 'info');
+    const arrayBuffer = await file.arrayBuffer();
+    const blob = new Blob([arrayBuffer], { type: file.type });
+    const formData = new FormData();
+    // Tentukan ekstensi
+    const ext = file.type.includes('png') ? 'png' : file.type.includes('webp') ? 'webp' : 'jpg';
+    formData.append('file', blob, `image.${ext}`);
+
+    return { type: 'file', value: formData, ext };
+  }
+
+  function fileToBase64Pure(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ─── STEP 2: CREATE TRIPO TASK ────────────────────────────────
+  async function createTripoTask(apiKey, imageResult, mode, artStyle) {
+    addLog('🚀 Kirim ke Tripo3D AI...', 'info');
+
+    const styleMap = { 'realistic':'pbr', 'cartoon':'cartoon', 'low-poly':'low-poly', 'sculpture':'sculpture' };
+    let taskId;
+
+    if (imageResult.type === 'url') {
+      // Via URL (dari imgbb)
+      const ext = imageResult.value.match(/\.png/i) ? 'png' : 'jpg';
+      const body = {
+        type: 'image_to_model',
+        file: { type: ext, url: imageResult.value },
+        model_version: 'v2.5-20250123',
+        face_limit: artStyle === 'low-poly' ? 5000 : 30000,
+        texture: true, pbr: true, auto_size: true,
+        style: styleMap[artStyle] || 'pbr'
+      };
+      const res = await fetch(`${TRIPO_API}/task`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        let msg = `Tripo error HTTP ${res.status}`;
+        try { const j = JSON.parse(t); msg = j.message || j.error || msg; } catch(e) {}
+        if (res.status === 401) msg = 'Tripo API key tidak valid';
+        if (res.status === 402) msg = 'Kredit Tripo habis — top up di platform.tripo3d.ai';
+        throw new Error(msg);
+      }
+      const data = await res.json();
+      taskId = data?.data?.task_id;
+
+    } else {
+      // Via file upload langsung ke Tripo
+      addLog('📦 Upload file ke Tripo...', 'info');
+      const uploadRes = await fetch(`${TRIPO_API}/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}` },
+        body: imageResult.value
+      });
+      if (!uploadRes.ok) {
+        const t = await uploadRes.text();
+        let msg = `Upload Tripo gagal HTTP ${uploadRes.status}`;
+        try { const j = JSON.parse(t); msg = j.message || j.error || msg; } catch(e) {}
+        if (uploadRes.status === 401) msg = 'Tripo API key tidak valid — cek kembali';
+        throw new Error(msg);
+      }
+      const uploadData = await uploadRes.json();
+      const token = uploadData?.data?.image_token;
+      if (!token) throw new Error('Upload OK tapi token tidak ditemukan');
+      addLog(`✓ Token: ${token.slice(0,12)}...`, 'ok');
+
+      const body = {
+        type: 'image_to_model',
+        file: { type: imageResult.ext || 'jpg', file_token: token },
+        model_version: 'v2.5-20250123',
+        face_limit: artStyle === 'low-poly' ? 5000 : 30000,
+        texture: true, pbr: true, auto_size: true,
+        style: styleMap[artStyle] || 'pbr'
+      };
+      const taskRes = await fetch(`${TRIPO_API}/task`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!taskRes.ok) {
+        const t = await taskRes.text();
+        let msg = `Task error HTTP ${taskRes.status}`;
+        try { const j = JSON.parse(t); msg = j.message || j.error || msg; } catch(e) {}
+        if (taskRes.status === 401) msg = 'Tripo API key tidak valid';
+        if (taskRes.status === 402) msg = 'Kredit Tripo habis';
+        throw new Error(msg);
+      }
+      const taskData = await taskRes.json();
+      taskId = taskData?.data?.task_id;
+    }
+
+    if (!taskId) throw new Error('Task dibuat tapi ID tidak ditemukan');
+    addLog(`✓ Task ID: ${taskId}`, 'ok');
+    return taskId;
+  }
+
+  // ─── STEP 3: POLL TASK STATUS ─────────────────────────────────
+  async function pollTripoTask(apiKey, taskId) {
+    addLog('⏳ Memantau progress AI...', 'info');
+    const maxAttempts = 150;
+    let attempts = 0;
+
+    return new Promise((resolve, reject) => {
+      const poll = async () => {
+        if (attempts++ > maxAttempts) {
+          reject(new Error('Timeout — coba lagi atau cek studio.tripo3d.ai'));
+          return;
+        }
+        try {
+          const res = await fetch(`${TRIPO_API}/task/${taskId}`, {
+            headers: { 'Authorization': `Bearer ${apiKey}` }
+          });
+          if (!res.ok) { reject(new Error(`Poll error HTTP ${res.status}`)); return; }
+
+          const data = await res.json();
+          const task = data?.data;
+          const status = task?.status;
+          const progress = task?.progress || 0;
+
+          addLog(`Status: ${status} | ${progress}%`, 'info');
+          setProgress(30 + (progress * 0.65), `AI memproses... ${progress}%`);
+
+          if (status === 'success') {
+            setProgress(100, '✅ Selesai!');
+            addLog('✓ Model 3D berhasil!', 'ok');
+            resolve(task);
+            return;
+          }
+          if (['failed','cancelled','error'].includes(status)) {
+            reject(new Error(`Task ${status}: ${task?.error?.message || 'Unknown error'}`));
+            return;
+          }
+          setTimeout(poll, 3000);
+        } catch(err) { reject(err); }
+      };
+      poll();
+    });
+  }
+
+  // ─── STEP 4: KONVERSI FORMAT TAMBAHAN ─────────────────────────
+  async function convertFormats(apiKey, taskId, formats) {
+    const results = {};
+    const canConvert = ['fbx', 'obj', 'stl', 'usdz'];
+
+    for (const fmt of formats) {
+      if (!canConvert.includes(fmt)) continue;
+      addLog(`🔄 Konversi ke ${fmt.toUpperCase()}...`, 'info');
+      try {
+        const res = await fetch(`${TRIPO_API}/task`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'convert_model',
+            original_model_task_id: taskId,
+            format: fmt,
+            quad: fmt === 'fbx',
+            face_limit: 50000
+          })
+        });
+        if (!res.ok) { addLog(`⚠️ Konversi ${fmt} gagal`, 'err'); continue; }
+        const d = await res.json();
+        const cTaskId = d?.data?.task_id;
+        if (!cTaskId) continue;
+        const url = await pollConvertTask(apiKey, cTaskId, fmt);
+        if (url) results[fmt] = url;
+      } catch(e) { addLog(`⚠️ ${fmt}: ${e.message}`, 'err'); }
+    }
+    return results;
+  }
+
+  async function pollConvertTask(apiKey, taskId, fmt) {
+    for (let i = 0; i < 60; i++) {
+      await new Promise(r => setTimeout(r, 3000));
+      try {
+        const res = await fetch(`${TRIPO_API}/task/${taskId}`, {
+          headers: { 'Authorization': `Bearer ${apiKey}` }
+        });
+        if (!res.ok) continue;
+        const data = await res.json();
+        const task = data?.data;
+        if (task?.status === 'success') {
+          const url = task?.output?.model || task?.output?.pbr_model;
+          if (url) { addLog(`✓ ${fmt.toUpperCase()} siap!`, 'ok'); return url; }
+        }
+        if (task?.status === 'failed') { addLog(`✗ Konversi ${fmt} gagal`, 'err'); return null; }
+      } catch(e) {}
+    }
+    return null;
+  }
+
+  // ─── MAIN GENERATE FLOW ───────────────────────────────────────
+  async function startGenerate() {
+    const tripoKey = document.getElementById('apiKey').value.trim();
+    const imgbbKey = document.getElementById('imgbbKey').value.trim();
+
+    if (!tripoKey) { showToast('⚠️ Masukkan Tripo3D API key dulu', 'error'); return; }
+    if (!selectedFile) { showToast('⚠️ Upload gambar dulu', 'error'); return; }
+
+    const formats = [...document.querySelectorAll('.format-check.active')].map(l => l.dataset.fmt);
+    if (!formats.length) { showToast('⚠️ Pilih minimal satu format', 'error'); return; }
+
+    const mode = document.getElementById('mode').value;
+    const artStyle = document.getElementById('artStyle').value;
+
+    document.getElementById('progressCard').classList.add('visible');
+    document.getElementById('resultCard').classList.remove('visible');
+    document.getElementById('generateBtn').disabled = true;
+    setProgress(5, 'Memulai...');
+    clearLog();
+    addLog('🎮 RBX 3D Forge — Tripo3D + imgbb', 'info');
+
+    try {
+      // 1. Upload gambar (coba imgbb dulu, fallback ke Tripo direct)
+      setProgress(10, 'Upload gambar...');
+      const imageResult = await uploadToImgbb(imgbbKey, selectedFile);
+
+      // 2. Buat task Tripo3D
+      setProgress(20, 'Membuat task Tripo3D...');
+      const taskId = await createTripoTask(tripoKey, imageResult, mode, artStyle);
+      currentTaskId = taskId;
+
+      // 3. Poll sampai selesai
+      setProgress(30, 'AI sedang memproses...');
+      const taskResult = await pollTripoTask(tripoKey, taskId);
+
+      // 4. Kumpulkan URL dari hasil task
+      const output = taskResult?.output || {};
+      const directUrls = {};
+      if (output.model)       directUrls['glb'] = output.model;
+      if (output.pbr_model)   directUrls['glb'] = output.pbr_model;
+      if (output.base_model)  directUrls['obj'] = output.base_model;
+
+      // 5. Konversi format tambahan
+      const needConvert = formats.filter(f => !directUrls[f] && f !== 'glb');
+      let convertedUrls = {};
+      if (needConvert.length > 0) {
+        setProgress(92, 'Konversi format...');
+        convertedUrls = await convertFormats(tripoKey, taskId, needConvert);
+      }
+
+      showResult({ ...directUrls, ...convertedUrls }, taskId);
+
+    } catch (err) {
+      addLog(`✗ Error: ${err.message}`, 'err');
+      setProgress(0, 'Gagal');
+      showToast('❌ ' + err.message, 'error');
+      document.getElementById('generateBtn').disabled = false;
+    }
+  }
+
+  // ─── SHOW RESULT ──────────────────────────────────────────────
+  function showResult(urls, taskId) {
+    const formatMeta = {
+      glb:  { icon: '🌐', label: 'GLB',  desc: 'Web / Unity',   color: 'var(--green)'  },
+      obj:  { icon: '📦', label: 'OBJ',  desc: 'Universal',     color: 'var(--blue)'   },
+      fbx:  { icon: '🎮', label: 'FBX',  desc: 'Roblox Studio', color: 'var(--red)'    },
+      stl:  { icon: '🖨️', label: 'STL',  desc: '3D Print',      color: 'var(--yellow)' },
+      usdz: { icon: '📱', label: 'USDZ', desc: 'AR / iOS',      color: 'var(--muted)'  }
+    };
+
+    const grid = document.getElementById('downloadGrid');
+    grid.innerHTML = '';
+    let found = 0;
+
+    Object.entries(urls).forEach(([fmt, url]) => {
+      if (!url) return;
+      const m = formatMeta[fmt] || { icon: '📄', label: fmt.toUpperCase(), desc: '', color: 'var(--muted)' };
+      found++;
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.download = `rbx_${taskId?.slice(-6) || 'model'}.${fmt}`;
+      a.className = 'download-btn';
+      a.innerHTML = `
+        <div class="fmt-icon">${m.icon}</div>
+        <div class="fmt-label" style="color:${m.color}">${m.label}</div>
+        <div class="fmt-desc">${m.desc}</div>
+      `;
+      grid.appendChild(a);
+    });
+
+    if (found === 0) {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;padding:16px;background:rgba(251,191,36,0.1);border:2px solid rgba(251,191,36,0.3);border-radius:12px;font-size:0.85rem;line-height:1.7;">
+          <strong style="color:var(--yellow);">⚠️ Download via Tripo Studio</strong><br>
+          Model berhasil diproses. Buka <a href="https://studio.tripo3d.ai" target="_blank" style="color:var(--blue);">studio.tripo3d.ai</a> → My Models untuk download.<br>
+          <strong>Task ID:</strong> <code style="color:var(--green);font-size:0.8rem;">${taskId}</code>
+        </div>`;
+      found = 1;
+    }
+
+    document.getElementById('resultSubtitle').textContent =
+      `Task: ${taskId?.slice(-8)} · ${found} format · Tripo3D`;
+    document.getElementById('progressCard').classList.remove('visible');
+    document.getElementById('resultCard').classList.add('visible');
+    document.getElementById('generateBtn').disabled = false;
+    showToast('🎉 3D Model siap didownload!', 'success');
+  }
+
+  function resetAll() {
+    document.getElementById('resultCard').classList.remove('visible');
+    document.getElementById('progressCard').classList.remove('visible');
+    clearFile();
+    currentTaskId = null;
+    modelUrls = {};
+    document.getElementById('generateBtn').disabled = false;
+    setProgress(0, '');
+    clearLog();
+  }
+
+  // ─── HELPERS ──────────────────────────────────────────────────
+  function setProgress(pct, status) {
+    document.getElementById('progressBar').style.width = pct + '%';
+    if (status) document.getElementById('progressStatus').textContent = status;
+  }
+
+  function addLog(msg, type = 'info') {
+    const log = document.getElementById('logArea');
+    const line = document.createElement('div');
+    line.className = `log-line ${type}`;
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function clearLog() {
+    document.getElementById('logArea').innerHTML = '';
+  }
+
+  function showToast(msg, type = 'info') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  // ─── FILE HANDLING ────────────────────────────────────────────
+  function handleDrag(e) {
+    e.preventDefault();
+    document.getElementById('uploadZone').classList.add('drag-over');
+  }
+
+  function handleDragLeave(e) {
+    document.getElementById('uploadZone').classList.remove('drag-over');
+  }
+
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('uploadZone').classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) processFile(file);
+    else showToast('⚠️ File harus berupa gambar', 'error');
+  }
+
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (file) processFile(file);
+  }
+
+  function processFile(file) {
+    if (file.size > 20 * 1024 * 1024) {
+      showToast('⚠️ Ukuran gambar maks 20MB', 'error');
+      return;
+    }
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('previewImg').src = ev.target.result;
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(1) + ' KB · ' + file.type;
+      document.getElementById('previewArea').classList.add('visible');
+      document.getElementById('uploadZone').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearFile() {
+    selectedFile = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('previewArea').classList.remove('visible');
+    document.getElementById('uploadZone').style.display = '';
+  }
+
+  // ─── STEP 1: UPLOAD IMAGE TO TRIPO ────────────────────────────
+  async function uploadImageToTripo(apiKey, file) {
+    addLog('📤 Upload gambar ke Tripo3D...', 'info');
+
+    // Convert to base64 for multipart
+    const arrayBuffer = await file.arrayBuffer();
+    const blob = new Blob([arrayBuffer], { type: file.type });
+
+    const formData = new FormData();
+    formData.append('file', blob, file.name);
+
+    const res = await fetch(`${TRIPO_API}/upload`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}` },
+      body: formData
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      let errMsg = `Upload gagal (HTTP ${res.status})`;
+      try {
+        const errJson = JSON.parse(errText);
+        errMsg = errJson.message || errJson.error || errMsg;
+      } catch(e) {}
+      throw new Error(errMsg);
+    }
+
+    const data = await res.json();
+    // Tripo returns { code: 200, data: { image_token: "..." } }
+    const token = data?.data?.image_token;
+    if (!token) throw new Error('Upload berhasil tapi token tidak ditemukan');
+    addLog(`✓ Gambar terupload. Token: ${token.slice(0,12)}...`, 'ok');
+    return token;
+  }
+
+  // ─── STEP 2: CREATE IMAGE-TO-3D TASK ──────────────────────────
+  async function createTripoTask(apiKey, imageToken, mode, artStyle) {
+    addLog('🚀 Membuat task Image-to-3D...', 'info');
+
+    const qualityMap = { draft: 'draft', standard: 'standard', detailed: 'detailed' };
+    const styleMap = {
+      'realistic': 'pbr',
+      'cartoon': 'cartoon',
+      'low-poly': 'low-poly',
+      'sculpture': 'sculpture'
+    };
+
+    const body = {
+      type: 'image_to_model',
+      file: { type: 'jpg', file_token: imageToken },
+      model_version: 'v2.5-20250123',
+      face_limit: artStyle === 'low-poly' ? 5000 : 30000,
+      texture: true,
+      pbr: true,
+      auto_size: true,
+      style: styleMap[artStyle] || 'pbr'
+    };
+
+    const res = await fetch(`${TRIPO_API}/task`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      let errMsg = `Create task gagal (HTTP ${res.status})`;
+      try {
+        const errJson = JSON.parse(errText);
+        errMsg = errJson.message || errJson.error || errMsg;
+        if (res.status === 401) errMsg = 'API key tidak valid. Cek kembali key kamu.';
+        if (res.status === 402) errMsg = 'Kredit habis. Top up di platform.tripo3d.ai';
+      } catch(e) {}
+      throw new Error(errMsg);
+    }
+
+    const data = await res.json();
+    const taskId = data?.data?.task_id;
+    if (!taskId) throw new Error('Task dibuat tapi ID tidak ditemukan');
+    addLog(`✓ Task ID: ${taskId}`, 'ok');
+    return taskId;
+  }
+
+  // ─── STEP 3: POLL TASK STATUS ─────────────────────────────────
+  async function pollTripoTask(apiKey, taskId) {
+    addLog('⏳ Memantau progress...', 'info');
+    const maxAttempts = 150;
+    let attempts = 0;
+
+    return new Promise((resolve, reject) => {
+      const poll = async () => {
+        if (attempts++ > maxAttempts) {
+          reject(new Error('Timeout — proses terlalu lama, coba lagi'));
+          return;
+        }
+
+        try {
+          const res = await fetch(`${TRIPO_API}/task/${taskId}`, {
+            headers: { 'Authorization': `Bearer ${apiKey}` }
+          });
+
+          if (!res.ok) { reject(new Error(`Poll error HTTP ${res.status}`)); return; }
+
+          const data = await res.json();
+          const task = data?.data;
+          const status = task?.status;
+          const progress = task?.progress || 0;
+
+          addLog(`Status: ${status} | Progress: ${progress}%`, 'info');
+          setProgress(25 + (progress * 0.7), `Memproses model... ${progress}%`);
+
+          if (status === 'success') {
+            setProgress(100, '✅ Selesai!');
+            addLog('✓ Model 3D berhasil dibuat!', 'ok');
+            resolve(task);
+            return;
+          }
+
+          if (status === 'failed' || status === 'cancelled' || status === 'error') {
+            reject(new Error(`Task ${status}: ${task?.error?.message || 'Unknown error'}`));
+            return;
+          }
+
+          // queued / running → lanjut poll
+          setTimeout(poll, 3000);
+        } catch(err) {
+          reject(err);
+        }
+      };
+
+      poll();
+    });
+  }
+
+  // ─── STEP 4: CONVERT TO TARGET FORMATS ────────────────────────
+  async function convertFormats(apiKey, taskId, formats) {
+    const results = {};
+    const supportedConvert = ['fbx', 'obj', 'stl', 'usdz'];
+    const directFormats = ['glb']; // GLB sudah tersedia langsung dari task result
+
+    for (const fmt of formats) {
+      if (directFormats.includes(fmt)) continue; // handled from task result
+
+      if (!supportedConvert.includes(fmt)) continue;
+
+      addLog(`🔄 Konversi ke ${fmt.toUpperCase()}...`, 'info');
+      try {
+        const res = await fetch(`${TRIPO_API}/task`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            type: 'convert_model',
+            original_model_task_id: taskId,
+            format: fmt,
+            quad: fmt === 'fbx',
+            face_limit: 50000
+          })
+        });
+
+        if (!res.ok) { addLog(`⚠️ Konversi ${fmt} gagal`, 'err'); continue; }
+        const data = await res.json();
+        const convertTaskId = data?.data?.task_id;
+        if (!convertTaskId) continue;
+
+        // Poll convert task
+        const convertResult = await pollConvertTask(apiKey, convertTaskId, fmt);
+        if (convertResult) results[fmt] = convertResult;
+      } catch(e) {
+        addLog(`⚠️ Konversi ${fmt} error: ${e.message}`, 'err');
+      }
+    }
+    return results;
+  }
+
+  async function pollConvertTask(apiKey, taskId, fmt) {
+    for (let i = 0; i < 60; i++) {
+      await new Promise(r => setTimeout(r, 3000));
+      const res = await fetch(`${TRIPO_API}/task/${taskId}`, {
+        headers: { 'Authorization': `Bearer ${apiKey}` }
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const task = data?.data;
+      if (task?.status === 'success') {
+        const url = task?.output?.model || task?.output?.pbr_model;
+        if (url) { addLog(`✓ ${fmt.toUpperCase()} siap!`, 'ok'); return url; }
+      }
+      if (task?.status === 'failed') { addLog(`✗ Konversi ${fmt} gagal`, 'err'); return null; }
+    }
+    return null;
+  }
+
+  // ─── MAIN GENERATE FLOW ───────────────────────────────────────
+  async function startGenerate() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    if (!apiKey) { showToast('⚠️ Masukkan API key Tripo3D dulu', 'error'); return; }
+    if (!selectedFile) { showToast('⚠️ Upload gambar dulu', 'error'); return; }
+
+    const formats = [...document.querySelectorAll('.format-check.active')].map(l => l.dataset.fmt);
+    if (!formats.length) { showToast('⚠️ Pilih minimal satu format', 'error'); return; }
+
+    const mode = document.getElementById('mode').value;
+    const artStyle = document.getElementById('artStyle').value;
+
+    document.getElementById('progressCard').classList.add('visible');
+    document.getElementById('resultCard').classList.remove('visible');
+    document.getElementById('generateBtn').disabled = true;
+    setProgress(5, 'Memulai...');
+    clearLog();
+    addLog('🎮 RBX 3D Forge — Tripo3D API', 'info');
+
+    try {
+      // 1. Upload image
+      setProgress(10, 'Upload gambar...');
+      const imageToken = await uploadImageToTripo(apiKey, selectedFile);
+
+      // 2. Create task
+      setProgress(20, 'Membuat task 3D...');
+      const taskId = await createTripoTask(apiKey, imageToken, mode, artStyle);
+      currentTaskId = taskId;
+
+      // 3. Poll until done
+      setProgress(25, 'AI sedang memproses...');
+      const taskResult = await pollTripoTask(apiKey, taskId);
+
+      // 4. Collect model URLs from task result
+      const directUrls = {};
+      const output = taskResult?.output || {};
+
+      // GLB biasanya langsung tersedia
+      if (output.model) directUrls['glb'] = output.model;
+      if (output.pbr_model) directUrls['glb'] = output.pbr_model;
+      if (output.base_model) directUrls['obj'] = output.base_model;
+
+      // 5. Convert additional formats
+      const needConvert = formats.filter(f => !directUrls[f]);
+      let convertedUrls = {};
+      if (needConvert.length > 0) {
+        setProgress(90, 'Konversi format...');
+        convertedUrls = await convertFormats(apiKey, taskId, needConvert);
+      }
+
+      const allUrls = { ...directUrls, ...convertedUrls };
+      showResult(allUrls, taskId);
+
+    } catch (err) {
+      addLog(`✗ Error: ${err.message}`, 'err');
+      setProgress(0, 'Gagal');
+      showToast('❌ ' + err.message, 'error');
+      document.getElementById('generateBtn').disabled = false;
+    }
+  }
+
+  // ─── SHOW RESULT ──────────────────────────────────────────────
+  function showResult(urls, taskId) {
+    const formatMeta = {
+      glb:  { icon: '🌐', label: 'GLB',  desc: 'Web / Unity',    color: 'var(--green)' },
+      obj:  { icon: '📦', label: 'OBJ',  desc: 'Universal',      color: 'var(--blue)'  },
+      fbx:  { icon: '🎮', label: 'FBX',  desc: 'Roblox Studio',  color: 'var(--red)'   },
+      stl:  { icon: '🖨️', label: 'STL',  desc: '3D Print',       color: 'var(--yellow)'},
+      usdz: { icon: '📱', label: 'USDZ', desc: 'AR / iOS',       color: 'var(--muted)' }
+    };
+
+    const grid = document.getElementById('downloadGrid');
+    grid.innerHTML = '';
+    let found = 0;
+
+    Object.entries(urls).forEach(([fmt, url]) => {
+      if (!url) return;
+      const m = formatMeta[fmt] || { icon: '📄', label: fmt.toUpperCase(), desc: '', color: 'var(--muted)' };
+      found++;
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.download = `rbx_model_${taskId?.slice(-6) || 'tripo'}.${fmt}`;
+      a.className = 'download-btn';
+      a.innerHTML = `
+        <div class="fmt-icon">${m.icon}</div>
+        <div class="fmt-label" style="color:${m.color}">${m.label}</div>
+        <div class="fmt-desc">${m.desc}</div>
+      `;
+      grid.appendChild(a);
+    });
+
+    if (found === 0) {
+      // Fallback: link ke Tripo Studio untuk download manual
+      grid.innerHTML = `
+        <div style="grid-column:1/-1; padding:16px; background:rgba(251,191,36,0.1); border:2px solid rgba(251,191,36,0.3); border-radius:12px; font-size:0.85rem; line-height:1.6;">
+          <strong style="color:var(--yellow);">⚠️ Download via Tripo Studio</strong><br>
+          Model berhasil dibuat tapi URL langsung tidak tersedia. Buka 
+          <a href="https://studio.tripo3d.ai" target="_blank" style="color:var(--blue);">studio.tripo3d.ai</a> 
+          → My Models → download dari sana.<br>
+          <strong>Task ID:</strong> <code style="color:var(--green);">${taskId}</code>
+        </div>`;
+      found = 1;
+    }
+
+    document.getElementById('resultSubtitle').textContent =
+      `Task ID: ${taskId} · ${found} format tersedia · Powered by Tripo3D`;
+
+    document.getElementById('progressCard').classList.remove('visible');
+    document.getElementById('resultCard').classList.add('visible');
+    document.getElementById('generateBtn').disabled = false;
+    showToast('🎉 3D Model siap didownload!', 'success');
+  }
+
+  function resetAll() {
+    document.getElementById('resultCard').classList.remove('visible');
+    document.getElementById('progressCard').classList.remove('visible');
+    clearFile();
+    currentTaskId = null;
+    modelUrls = {};
+    document.getElementById('generateBtn').disabled = false;
+    setProgress(0, '');
+    clearLog();
+  }
+
+  // ─── HELPERS ──────────────────────────────────────────────────
+  function setProgress(pct, status) {
+    document.getElementById('progressBar').style.width = pct + '%';
+    if (status) document.getElementById('progressStatus').textContent = status;
+  }
+
+  function addLog(msg, type = 'info') {
+    const log = document.getElementById('logArea');
+    const line = document.createElement('div');
+    line.className = `log-line ${type}`;
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function clearLog() {
+    document.getElementById('logArea').innerHTML = '';
+  }
+
+  function showToast(msg, type = 'info') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+</script>
+
+</body>
+</html>
